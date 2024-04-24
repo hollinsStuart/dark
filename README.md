@@ -21,7 +21,7 @@ conda activate dark
 ```shell
 nvidia-smi
 ```
-Please visit https://developer.nvidia.com/cuda-downloads for downloading the CUDA Toolkit of your version.
+Please visit https://developer.nvidia.com/cuda-downloads for downloading the CUDA Toolkit of your version. Chances are that you will need to uninstall the current cuda toolkit and reinstall again if they do not match in the first place.
 
 Use 
 ```nvcc --version``` to check whether your cuda toolkit is successfully installed on your computer.
