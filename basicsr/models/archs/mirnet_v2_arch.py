@@ -18,7 +18,7 @@ class SKFF(nn.Module):
         d = max(int(in_channels/reduction),4)
         
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        # self.conv_du = nn.Sequential(nn.Conv2d(in_channels, d, 1, padding=0, bias=bias), nn.LeakyReLU(0.2))
+        self.conv_du = nn.Sequential(nn.Conv2d(in_channels, d, 1, padding=0, bias=bias), nn.LeakyReLU(0.2))
         self.conv_du = nn.Sequential(nn.Conv2d(in_channels, d, 1, padding=0, bias=bias))
 
         self.fcs = nn.ModuleList([])
@@ -59,11 +59,11 @@ class ContextBlock(nn.Module):
         self.conv_mask = nn.Conv2d(n_feat, 1, kernel_size=1, bias=bias)
         self.softmax = nn.Softmax(dim=2)
 
-        # self.channel_add_conv = nn.Sequential(
-        #     nn.Conv2d(n_feat, n_feat, kernel_size=1, bias=bias),
-        #     nn.LeakyReLU(0.2),
-        #     nn.Conv2d(n_feat, n_feat, kernel_size=1, bias=bias)
-        # )
+        self.channel_add_conv = nn.Sequential(
+            nn.Conv2d(n_feat, n_feat, kernel_size=1, bias=bias),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(n_feat, n_feat, kernel_size=1, bias=bias)
+        )
 
     def modeling(self, x):
         batch, channel, height, width = x.size()
@@ -77,8 +77,7 @@ class ContextBlock(nn.Module):
         # [N, 1, H * W]
         context_mask = context_mask.view(batch, 1, height * width)
         # [N, 1, H * W]
-        # context_mask = self.softmax(context_mask)
-        context_mask = self.sigmoid(context_mask)
+        context_mask = self.softmax(context_mask)
         # [N, 1, H * W, 1]
         context_mask = context_mask.unsqueeze(3)
         # [N, 1, C, 1]
@@ -114,11 +113,44 @@ class RCB(nn.Module):
 
         self.act = act
         
-        # self.gcnet = ContextBlock(n_feat, bias=bias)
+        self.gcnet = ContextBlock(n_feat, bias=bias)
 
     def forward(self, x):
         res = self.body(x)
         # res = self.act(self.gcnet(res))
+        res += x
+        return res
+    
+##########################################################################
+### --------- Simplified Context Block (SCB) ----------
+class SimplifiedContextBlock(nn.Module):
+    def __init__(self, n_feat, bias=False):
+        super(SimplifiedContextBlock, self).__init__()
+
+        self.conv_mask = nn.Conv2d(n_feat, 1, kernel_size=1, bias=bias)
+
+    def forward(self, x):
+        # Context modeling
+        batch, channel, height, width = x.size()
+        # Avoid redundant operations by merging view and unsqueeze
+        context_mask = self.conv_mask(x).view(batch, 1, height * width)
+        context_mask = F.softmax(context_mask, dim=2).view(batch, 1, height, width)
+
+        # Using broadcasting instead of matrix multiplication for efficiency
+        context = torch.sum(x * context_mask, dim=[2, 3], keepdim=True)
+        return x + context  # Simplified channel addition
+
+##########################################################################
+### --------- Simplified Residual Context Block (SRCB) ----------
+class SimplifiedRCB(nn.Module):
+    def __init__(self, n_feat, kernel_size=3, reduction=8, bias=False, groups=1):
+        super(SimplifiedRCB, self).__init__()
+        self.body = nn.Conv2d(n_feat, n_feat, kernel_size, stride=1, padding=kernel_size//2, bias=bias, groups=groups)
+        self.gcnet = SimplifiedContextBlock(n_feat, bias=bias)
+
+    def forward(self, x):
+        res = self.body(x)
+        res = self.gcnet(res)
         res += x
         return res
 
@@ -208,8 +240,8 @@ class MRB(nn.Module):
         self.conv_out = nn.Conv2d(n_feat, n_feat, kernel_size=1, padding=0, bias=bias)
 
         # # only two inputs for SKFF
-        # self.skff_top = SKFF(int(n_feat*chan_factor**0), 2)
-        # self.skff_mid = SKFF(int(n_feat*chan_factor**1), 2)
+        self.skff_top = SKFF(int(n_feat*chan_factor**0), 2)
+        self.skff_mid = SKFF(int(n_feat*chan_factor**1), 2)
 
     def forward(self, x):
         x_top = x.clone()
@@ -220,15 +252,17 @@ class MRB(nn.Module):
         x_mid = self.dau_mid(x_mid)
         x_bot = self.dau_bot(x_bot)
 
-        # x_mid = self.skff_mid([x_mid, self.up32_1(x_bot)])
-        # x_top = self.skff_top([x_top, self.up21_1(x_mid)])
+        x_mid = self.skff_mid([x_mid, self.up32_1(x_bot)])
+        x_top = self.skff_top([x_top, self.up21_1(x_mid)])
 
-        x_top = self.dau_top(x_top)
-        x_mid = self.dau_mid(x_mid)
-        x_bot = self.dau_bot(x_bot)
+        # x_top = self.dau_top(x_top)
+        # x_mid = self.dau_mid(x_mid)
+        # x_bot = self.dau_bot(x_bot)
 
         # x_mid = self.skff_mid([x_mid, self.up32_2(x_bot)])
         # x_top = self.skff_top([x_top, self.up21_2(x_mid)])
+
+        # x_top = self.skff_top([x_top, self.up32_2(x_bot)])
 
         out = self.conv_out(x_top)
         out = out + x
@@ -250,8 +284,8 @@ class RRG(nn.Module):
         return res
 
 
-##########################################################################
-##---------- MIRNet  -----------------------
+#---------- MIRNet  -----------------------
+# TODO: change the name of the model
 class MIRNet_v2(nn.Module):
     def __init__(self,
         inp_channels=3,
