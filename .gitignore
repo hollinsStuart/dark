@@ -26,6 +26,8 @@ venv3/
 Enhancement/Datasets
 experiments/
 
+results/
+
 # macOS system files
 *.DS_Store
 

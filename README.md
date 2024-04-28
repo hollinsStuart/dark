@@ -6,7 +6,7 @@ Follow these intructions
 ## 1. Clone our repository
 ```shell
 git clone git@github.com:hollinsStuart/dark.git
-cd MIRNetv2
+cd dark
 ```
 
 ## 2. Make conda environment
@@ -36,11 +36,15 @@ pip install -r requirements.txt
 python setup.py develop
 ```
 
+## 5. Download Dataset:
+We use the following datasets:
+Lol_train  https://drive.google.com/file/d/1K29vsPfMUsAkYvmNLcaUgiOEYGMxFydd/view?usp=sharing
+Lol_test  https://drive.google.com/file/d/1jUGpsih3T-1H7t3gqpEdj7ZD5GcU_v0m/view?usp=sharing
 
-## 5. Modify the configuration file
+## 6. Modify the configuration file
 Please modify the parameters in Enhancement/Options/dark_train_config.yml
 
-## 6. Train the model
+## 7. Train the model
 ```shell
 python3 basicsr/train.py -opt Enhancement/Options/dark_train_config.yml
 ```

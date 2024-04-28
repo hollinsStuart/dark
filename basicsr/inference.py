@@ -8,7 +8,7 @@ import tqdm
 from skimage import img_as_ubyte
 from natsort import natsorted
 from basicsr.metrics.psnr_ssim import calculate_psnr, calculate_ssim
-from models.archs.mirnet_v2_arch import *
+from models.archs.dark_arch import *
 
 
 def main():
@@ -16,8 +16,9 @@ def main():
     parser.add_argument(
         '--model_path',
         type=str,
+        
         default=  # noqa: E251
-        'experiments/Enhancement_MIRNet_v2_lol/models/net_g_latest.pth'  # noqa: E501
+        'experiments/Enhancement_DarkNet_lol/models/net_g_3000.pth'  # noqa: E501
     )
     parser.add_argument('--input', type=str, default='Enhancement/Datasets/test/Lol/input', help='input test image folder')
     parser.add_argument('--output', type=str, default='results/Enhancement_test', help='output folder')
@@ -25,8 +26,8 @@ def main():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # set up model
-    model = MIRNet_v2()
-    model.load_state_dict(torch.load(args.model_path)['params'], strict=True)
+    model = DarkNet()
+    model.load_state_dict(torch.load(args.model_path)['params'], strict=False)
     model.eval()
     model = model.to(device)
     print("Model Info: ",model)
