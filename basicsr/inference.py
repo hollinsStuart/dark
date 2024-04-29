@@ -18,7 +18,7 @@ def main():
         type=str,
         
         default=  # noqa: E251
-        'experiments/Enhancement_DarkNet_lol/models/net_g_3000.pth'  # noqa: E501
+        'experiments/Enhancement_DarkNet_lol/models/net_g_latest.pth'
     )
     parser.add_argument('--input', type=str, default='Enhancement/Datasets/test/Lol/input', help='input test image folder')
     parser.add_argument('--output', type=str, default='results/Enhancement_test', help='output folder')

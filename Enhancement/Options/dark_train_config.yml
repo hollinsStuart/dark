@@ -72,7 +72,7 @@ path:
 
 # training settings
 train:
-  total_iter: 20000 # modify
+  total_iter: 100000 # modify
   warmup_iter: -1 # no warm up
   use_grad_clip: true
 
