@@ -16,16 +16,6 @@ conda activate dark
 ```
 
 ## 3. Install dependencies
-### CUDA Toolkit
-**You will need to install the correct CUDA toolkit of your version.** Use the following command to check.
-```shell
-nvidia-smi
-```
-Please visit https://developer.nvidia.com/cuda-downloads for downloading the CUDA Toolkit of your version. Chances are that you will need to uninstall the current cuda toolkit and reinstall again if they do not match in the first place.
-
-Use 
-```nvcc --version``` to check whether your cuda toolkit is successfully installed on your computer.
-
 ### Packages
 ```shell
 pip install -r requirements.txt
@@ -38,13 +28,23 @@ python setup.py develop
 
 ## 5. Download Dataset:
 We use the following datasets:
+
 Lol_train  https://drive.google.com/file/d/1K29vsPfMUsAkYvmNLcaUgiOEYGMxFydd/view?usp=sharing
 Lol_test  https://drive.google.com/file/d/1jUGpsih3T-1H7t3gqpEdj7ZD5GcU_v0m/view?usp=sharing
 
+If you cloned our git repo, the training/testing datasets are already at Enhancement/Datasets folder.
+
 ## 6. Modify the configuration file
-Please modify the parameters in Enhancement/Options/dark_train_config.yml
+Please modify the parameters in Enhancement/Options/dark_train_config.yml.
 
 ## 7. Train the model
 ```shell
 python3 basicsr/train.py -opt Enhancement/Options/dark_train_config.yml
 ```
+
+## 8. Check the image outcome
+```shell
+python3 basicsr/inference.py 
+```
+
+The image outcome is at results/Enhancement_test folder
