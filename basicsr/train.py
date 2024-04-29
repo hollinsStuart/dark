@@ -132,7 +132,6 @@ def main():
 
     # initialize loggers
     logger = init_loggers(opt)
-    # assert False, "logger initialized"
     # create train and validation dataloaders
     result = create_train_val_dataloader(opt, logger)
     train_loader, train_sampler, val_loader, total_epochs, total_iters = result
@@ -146,7 +145,6 @@ def main():
 
     # dataloader prefetcher
     prefetch_mode = opt['datasets']['train'].get('prefetch_mode')
-    # assert False
     if prefetch_mode is None or prefetch_mode == 'cpu':
         prefetcher = CPUPrefetcher(train_loader)
     elif prefetch_mode == 'cuda':
@@ -162,7 +160,6 @@ def main():
     data_time, iter_time = time.time(), time.time()
     start_time = time.time()
 
-    # for epoch in range(start_epoch, total_epochs + 1):
 
     iters = opt['datasets']['train'].get('iters')
     batch_size = opt['datasets']['train'].get('batch_size_per_gpu')
@@ -227,7 +224,6 @@ def main():
                 # -------------------------------------------
 
                 model.feed_train_data({'lq': lq, 'gt': gt})
-                # assert False
                 model.optimize_parameters(current_iter)
 
                 iter_time = time.time() - iter_time
