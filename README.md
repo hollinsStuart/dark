@@ -2,6 +2,9 @@
 
 [View the Paper](https://github.com/username/repository/blob/main/path/to/your/file.pdf)
 
+![input_UM](docs/input_UM.png)
+![restored_UM](docs/restored_UM.png)
+
 The "DARK: Denoising, Amplification Restoration Kit" project introduces an innovative computational framework for enhancing images captured in low-light conditions. The project leverages the principles of Retinex theory combined with advanced image restoration techniques facilitated by convolutional neural networks. By incorporating streamlined architectural elements inspired by MIRNet-v2 and the Retinexformer, the model focuses on efficient, context-sensitive image processing, significantly improving image clarity and color fidelity while maintaining a minimal computational footprint.
 
 ![DARK](docs/DARK.svg)
