@@ -1,4 +1,3 @@
-
 # --- Imports --- #
 import torch
 import torch.nn as nn
@@ -164,52 +163,6 @@ class UpSample(nn.Module):
         return x
 
 
-##########################################################################
-##---------- Multi-Scale Resiudal Block (MRB) ----------
-class MRB(nn.Module):
-    def __init__(self, n_feat, height, width, chan_factor, bias,groups):
-        super(MRB, self).__init__()
-
-        self.n_feat, self.height, self.width = n_feat, height, width
-
-        self.dau_top = SimplifiedRCB(int(n_feat*chan_factor**0), bias=bias, groups=groups)
-        self.dau_mid = SimplifiedRCB(int(n_feat*chan_factor**1), bias=bias, groups=groups)
-        self.dau_bot = SimplifiedRCB(int(n_feat*chan_factor**2), bias=bias, groups=groups)
-
-        self.down2 = DownSample(int((chan_factor**0)*n_feat),2,chan_factor)
-        self.down4 = nn.Sequential(
-            DownSample(int((chan_factor**0)*n_feat),2,chan_factor), 
-            DownSample(int((chan_factor**1)*n_feat),2,chan_factor)
-        )
-
-        self.up21_1 = UpSample(int((chan_factor**1)*n_feat),2,chan_factor)
-        self.up21_2 = UpSample(int((chan_factor**1)*n_feat),2,chan_factor)
-        self.up32_1 = UpSample(int((chan_factor**2)*n_feat),2,chan_factor)
-        self.up32_2 = UpSample(int((chan_factor**2)*n_feat),2,chan_factor)
-
-        self.conv_out = nn.Conv2d(n_feat, n_feat, kernel_size=1, padding=0, bias=bias)
-
-        # # only two inputs for SKFF
-        self.skff_top = SKFF(int(n_feat*chan_factor**0), 2)
-        self.skff_mid = SKFF(int(n_feat*chan_factor**1), 2)
-
-    def forward(self, x):
-        x_top = x.clone()
-        x_mid = self.down2(x_top)
-        x_bot = self.down4(x_top)
-
-        x_top = self.dau_top(x_top)
-        x_mid = self.dau_mid(x_mid)
-        x_bot = self.dau_bot(x_bot)
-
-        x_mid = self.skff_mid([x_mid, self.up32_1(x_bot)])
-        x_top = self.skff_top([x_top, self.up21_1(x_mid)])
-
-        out = self.conv_out(x_top)
-        out = out + x
-
-        return out
-    
 
 class MMRB(nn.Module):
     def __init__(self, n_feat, height, width, chan_factor, bias,groups):
@@ -218,7 +171,6 @@ class MMRB(nn.Module):
         self.n_feat, self.height, self.width = n_feat, height, width
 
         self.dau_top = SimplifiedRCB(int(n_feat*chan_factor**0), bias=bias, groups=groups)
-        #self.dau_mid = SimplifiedRCB(int(n_feat*chan_factor**1), bias=bias, groups=groups)
 
         self.down2 = DownSample(int((chan_factor**0)*n_feat),2,chan_factor)
 

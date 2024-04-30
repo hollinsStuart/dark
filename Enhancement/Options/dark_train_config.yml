@@ -25,19 +25,10 @@ datasets:
 
     ### -------------Progressive training--------------------------
     mini_batch_sizes: [8,5,4,2,1,1]             # Batch size per gpu   
-    # iters: [46000,32000,24000,18000,18000,12000]
     iters: [1000,1000,1000,1000,1000,1000]  # Iterations for progressive training.
     
     gt_size: 384   # Max patch size for progressive training
     gt_sizes: [128,160,192,256,320,384]  # Patch sizes for progressive training.
-    ### ------------------------------------------------------------
-
-    ### ------- Training on single fixed-patch size 128x128---------
-    # mini_batch_sizes: [8]   
-    # iters: [300000]
-    # gt_size: 128   
-    # gt_sizes: [128]
-    ### ------------------------------------------------------------
 
     dataset_enlarge_ratio: 1
     prefetch_mode: cuda
@@ -76,9 +67,6 @@ train:
   warmup_iter: -1 # no warm up
   use_grad_clip: true
 
-  # Split 300k iterations into two cycles. 
-  # 1st cycle: fixed 3e-4 LR for 92k iters. 
-  # 2nd cycle: cosine annealing (3e-4 to 1e-6) for 208k iters.
   scheduler:
     type: CosineAnnealingRestartCyclicLR
     periods: [46000, 104000]       
@@ -93,7 +81,6 @@ train:
   optim_g:
     type: Adam
     lr: !!float 2e-4
-    # weight_decay: !!float 1e-4
     betas: [0.9, 0.999]
   
   # losses
@@ -112,11 +99,11 @@ val:
   max_minibatch: 8
 
   metrics:
-    psnr: # metric name, can be arbitrary
+    psnr: 
       type: calculate_psnr
       crop_border: 0
       test_y_channel: false
-    ssim: # new metric
+    ssim: 
       type: calculate_ssim
       crop_border: 0
       test_y_channel: false
