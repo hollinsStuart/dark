@@ -1,6 +1,6 @@
 # DARK: Denoising, Amplification, Restoration Kit
 
-[View the Paper](https://github.com/username/repository/blob/main/path/to/your/file.pdf)
+[View the Paper](https://github.com/hollinsStuart/dark/blob/master/docs/EECS442_Project_Report.pdf)
 
 ![input_UM](docs/input_UM.png)
 ![restored_UM](docs/restored_UM.png)
